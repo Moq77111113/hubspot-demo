@@ -36,7 +36,10 @@ export class ContactService {
       properties: [
         propBuilder("email", `${userId}-${new Date().getTime()}@myapp.com`),
         propBuilder("firstname", userId),
-        propBuilder("lastname", userId.split("").reverse().join("")),
+        propBuilder(
+          "lastname",
+          userId.split("").reduce((prev, cur) => cur + prev, "")
+        ),
         propBuilder("city", "Paris"),
         propBuilder("zip", "75001"),
       ],

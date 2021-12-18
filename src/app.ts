@@ -42,6 +42,9 @@ app.get("/", async (req, res, next) => {
       res.write(`<li><a href="/contacts">All Contacts</a></li>`);
       res.write(`<li><a href="/contacts/create">Create contact</a></li>`);
       res.write(`<li><a href="/workflows">All Workflows</a></li>`);
+      res.write(
+        `<li><a href="/workflows/${Date.now()}">Enroll an user in the first workflow</a></li>`
+      );
       res.write(`</ul>`);
     });
   } else {
