@@ -1,5 +1,5 @@
 import { Express, NextFunction, Request, Response } from "express";
-import { checkAuth } from '../helpers/auth';
+import { checkAuth } from "../helpers/auth";
 import { ContactService } from "../services/contact.service";
 export class ContactController {
   private contactService: ContactService;
@@ -21,12 +21,22 @@ export class ContactController {
   ) => {
     const controller = new ContactController(q);
     app.get("/contacts", checkAuth(), controller.allContacts());
+    app.get("/contacts/create", checkAuth(), controller.create());
     return app;
   };
   private allContacts = () => {
     return async (req: Request, res: Response, next: NextFunction) => {
       return this.contactService
         .getAll(req.sessionID)
+        .then((resp) => res.send(resp))
+        .catch((err) => res.send(err));
+    };
+  };
+
+  private create = () => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      return this.contactService
+        .create(req.sessionID)
         .then((resp) => res.send(resp))
         .catch((err) => res.send(err));
     };

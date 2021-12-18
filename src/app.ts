@@ -40,6 +40,7 @@ app.get("/", async (req, res, next) => {
       res.write(`Welcome to the app, here are some test applications :`);
       res.write(`<ul>`);
       res.write(`<li><a href="/contacts">All Contacts</a></li>`);
+      res.write(`<li><a href="/contacts/create">Create contact</a></li>`);
       res.write(`<li><a href="/workflows">All Workflows</a></li>`);
       res.write(`</ul>`);
     });

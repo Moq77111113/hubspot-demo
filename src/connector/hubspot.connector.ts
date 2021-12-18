@@ -12,7 +12,7 @@ export class HubSpotConnector {
     }
     return this._instance;
   };
-  public search = async <T extends object>(
+  public search = async <T extends any>(
     userId: string,
     hs: { route: string; headers?: { [key: string]: string } },
     q: {
@@ -30,6 +30,28 @@ export class HubSpotConnector {
       .catch((err: AxiosError) => {
         throw (
           err.response?.data ?? { code: 500, message: "Internal server Error" }
+        );
+      });
+  };
+
+  public create = async <T extends object>(
+    userId: string,
+    hs: { route: string; headers?: { [key: string]: string }, body?: any },
+    q: {
+      CLIENT_ID: string;
+      CLIENT_SECRET: string;
+      REDIRECT_URI: string;
+    }
+  ) => {
+    const token = await AuthService.getAccessToken(userId, q);
+    return axios
+      .post<T>(hs.route, hs.body, {
+        headers: { ...hs.headers, Authorization: `Bearer ${token}` },
+      })
+      .then((resp) => resp.data)
+      .catch((err: AxiosError) => {
+        throw (
+          { ...err.response?.data, status: err.response?.status} ?? { code: 500, message: "Internal server Error" }
         );
       });
   };
