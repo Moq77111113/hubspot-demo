@@ -10,7 +10,7 @@ This is a training server using hubspot's api.
 
 CLIENT_ID=
 CLIENT_SECRET=
-SCOPE=
+SCOPE= # comma separated scopes info here : https://legacydocs.hubspot.com/docs/methods/oauth2/initiate-oauth-integration#scopes
 
 # Express 
 PORT= # Default 3000

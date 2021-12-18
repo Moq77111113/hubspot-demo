@@ -1,12 +1,11 @@
 import { config as loadEnv } from "dotenv";
 import express from "express";
 import session from "express-session";
-import http from "http";
-import { getAccessToken, isAuthorized } from "./helpers/auth";
+import { isAuthorized } from "./helpers/auth";
 import { checkEnv } from "./helpers/env";
 import { shutdown } from "./helpers/shutdown";
-import { authCallBack, authorize, checkAuth } from "./routes/auth";
-import { allContacts } from "./routes/contacts";
+import { HubSpotServer } from "./controllers";
+import { AuthService } from "./services/auth.service";
 loadEnv({ path: __dirname + "\\..\\.env" });
 
 const {
@@ -17,6 +16,7 @@ const {
   AUTH_URL,
   REDIRECT_URI,
 } = checkEnv();
+
 // Instanciate express
 const app = express();
 
@@ -25,25 +25,13 @@ app.use(
   session({ secret: SESSION_SECRET, resave: true, saveUninitialized: true })
 );
 
-// Controllers
-app.get("/authorize", authorize(AUTH_URL));
-app.get(
-  "/oauth-callback",
-  authCallBack({ CLIENT_ID, CLIENT_SECRET, REDIRECT_URI })
-);
-
-app.get(
-  "/contacts",
-  checkAuth(),
-  allContacts({ CLIENT_ID, CLIENT_SECRET, REDIRECT_URI })
-);
-
+// Home
 app.get("/", async (req, res, next) => {
   res.setHeader("Content-Type", "text/html");
   res.write("<h1>Hubspot test server</h1>");
 
   if (isAuthorized(req.sessionID)) {
-    getAccessToken(req.sessionID, {
+    AuthService.getAccessToken(req.sessionID, {
       CLIENT_ID,
       CLIENT_SECRET,
       REDIRECT_URI,
@@ -52,6 +40,7 @@ app.get("/", async (req, res, next) => {
       res.write(`Welcome to the app, here are some test applications :`);
       res.write(`<ul>`);
       res.write(`<li><a href="/contacts">All Contacts</a></li>`);
+      res.write(`<li><a href="/workflows">All Workflows</a></li>`);
       res.write(`</ul>`);
     });
   } else {
@@ -63,12 +52,15 @@ app.get("/", async (req, res, next) => {
 });
 
 // Server launch
-const server = new Promise<http.Server>((res) =>
-  res(
-    app.listen(PORT, () => {
-      console.info(`🚀 Server listening on port : ${PORT}`);
-    })
-  )
+const server = HubSpotServer.Bootstrap(app, {
+  CLIENT_ID,
+  CLIENT_SECRET,
+  REDIRECT_URI,
+  AUTH_URL,
+}).then((app) =>
+  app.listen(PORT, () => {
+    console.info(`🚀 Server listening on port : ${PORT}`);
+  })
 );
 
 // Handle graceful shutdown
